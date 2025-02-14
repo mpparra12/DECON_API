@@ -1,0 +1,25 @@
+<?php
+
+require_once('TransactionRepository.php');
+
+$app->get('/api/decon/getTransaction', function ($request, $response)
+{
+    $idTrasaction = $request->getQueryParam('id');
+
+    $transactionRepository = new TransactionRepository($this->db);
+    $data = $transactionRepository->getTransactionById($idTrasaction);
+    if (!$data) {
+        $errorResponse = [
+            'error' => true,
+            'stateCode' => 400,
+            'result' => 'No se encontraron Registros'
+        ];
+
+        return $response->withJson($errorResponse, 400);
+    }
+    return $response->withJson($data, 200);
+});
+
+
+
+?>
