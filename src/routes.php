@@ -41,7 +41,7 @@ $app->get('/api/decon/getAll', function ($request, $response)
         return $response->withJson($errorResponse, 400);
     }
     return $response->withJson($data, 200)
-    ->withHeader('Access-Control-Allow-Origin', 'http://localhost:4200')
+    ->withHeader('Access-Control-Allow-Origin', '*')
     ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
     ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
 });
@@ -158,6 +158,54 @@ $app->delete('/api/decon/deleteClient', function ($request, $response) {
     ->withHeader('Access-Control-Allow-Origin', 'http://localhost:4200')
     ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
     ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+});
+
+$app->get('/api/decon/getAll', function ($request, $response)
+{
+    $transactionRepository = new TransactionRepository($this->db);
+    $data = $transactionRepository->getAll_Projects();
+
+    if (!$data) {
+        return $response->withJson([
+            'error' => true,
+            'stateCode' => 400,
+            'result' => 'No se encontraron Registros'
+        ], 400);
+    }
+
+    return $response->withJson($data, 200)
+        ->withHeader('Access-Control-Allow-Origin', 'http://localhost:4200')
+        ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
+        ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+});
+
+$app->post('/api/decon/AddClient', function ($request, $response)
+{
+    $input =  $request->getParsedBody();
+    $nom= $input["name"];
+    $addr= $input["add"];
+    $cit= $input["city"];
+    $state= $input["state"];
+    $zip= $input["zipcode"];
+    $act= $input["act"];
+
+
+    $transactionRepository = new TransactionRepository($this->db);
+    $data = $transactionRepository->Addclient( $nom,  $addr, $cit, $state, $zip, $act);
+    if (!$data) {
+        $errorResponse = [
+            'error' => true,
+            'stateCode' => 400,
+            'result' => 'No se encontraron Registros'
+        ];
+
+        return $response->withJson($errorResponse, 400);
+    }
+    return $response->withJson($data, 200)
+    ->withHeader('Access-Control-Allow-Origin', 'http://decon_api.test/')
+    ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
+    ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+
 });
 
 

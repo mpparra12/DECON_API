@@ -134,5 +134,26 @@ VALUES
         ':id'=> $id
         ]);
     }
-  }
+
+    public function getAll_Projects()
+    {
+        $stmt1 = $this->db->prepare("SELECT * FROM projects_proposal"); 
+        $stmt1->execute();
+        return $stmt1->fetchAll();
+    }
+    
+    public function Addclient($name, $address, $city, $state, $zipcode, $act)
+{
+    $stmt = $this->db->prepare("INSERT INTO projects_proposal (name, address, city, state, zipcode, activity) VALUES (?, ?, ?, ?, ?, ?)");
+    $result = $stmt->execute([$name, $address, $city, $state, $zipcode, $act]);
+
+    if ($result) {
+        return [
+            'success' => true,
+            'id' => $this->db->lastInsertId()
+        ];
+    } else {
+        return false;
+    }
+}
 
