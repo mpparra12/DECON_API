@@ -100,15 +100,19 @@ $app->put('/api/decon/updateClient', function ($request, $response) {
     $transactionRepository = new TransactionRepository($this->db);
     $data = $transactionRepository->Updateclient($nom, $addr, $cit, $state, $zip, $act, $id);
 
-    if (!$data) {
+    if ($data === 0) {
         return $response->withJson([
             'error' => true,
             'stateCode' => 400,
-            'result' => "No records found. ID: $id"
+            'result' => "No records updated. ID may not exist or values were the same."
         ], 400);
     }
 
-    return $response->withJson($data, 200);
+ return $response->withJson([
+        'error' => false,
+        'stateCode' => 200,
+        'result' => "Client ID $id updated successfully"
+    ], 200);
 });
 
 // DELETE: Delete a client

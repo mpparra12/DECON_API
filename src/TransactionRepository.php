@@ -108,27 +108,29 @@ class TransactionRepository
 
     // Función para actualizar un cliente
     public function updateClient($nom, $add, $cit, $state, $zip, $act, $id)
-    {
-        $sql = "UPDATE clients SET 
-                    `Name` = :name,
-                    `Address` = :address,
-                    `City` = :city,
-                    `State` = :state,
-                    `ZipCode` = :zipcode,
-                    `Active` = :act
-                WHERE `ClientID` = :id";
+{
+    $sql = "UPDATE clients SET 
+                `Name` = :name,
+                `Address` = :address,
+                `City` = :city,
+                `State` = :state,
+                `ZipCode` = :zipcode,
+                `Active` = :act
+            WHERE `ClientID` = :id";
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([
-            ':name' => $nom,
-            ':address' => $add, 
-            ':city' => $cit,
-            ':state' => $state,
-            ':zipcode' => $zip,
-            ':act' => $act,
-            ':id' => $id
-        ]);
-    }
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute([
+        ':name' => $nom,
+        ':address' => $add, 
+        ':city' => $cit,
+        ':state' => $state,
+        ':zipcode' => $zip,
+        ':act' => $act,
+        ':id' => $id
+    ]);
+
+    return $stmt->rowCount();
+}
 
     // Función para obtener todos los proyectos
     public function getAllProjects()
