@@ -1,80 +1,78 @@
 <?php
 
-ini_set('display_errors', '0');error_reporting(0);
+ini_set('display_errors', '0');
+error_reporting(0);
 
 require_once 'TransactionRepository.php';
 
-$app->get('/api/decon/getTransaction', function ($request, $response)
-{
-    $idTrasaction = $request->getQueryParam('id');
+// GET: Get transaction by ID
+$app->get('/api/decon/getTransaction', function ($request, $response) {
+    $idTransaction = $request->getQueryParam('id');
 
     $transactionRepository = new TransactionRepository($this->db);
-    $data = $transactionRepository->getTransactionById($idTrasaction);
+    $data = $transactionRepository->getTransactionById($idTransaction);
+
     if (!$data) {
         $errorResponse = [
             'error' => true,
             'stateCode' => 400,
             'result' => 'No se encontraron Registros'
         ];
-
         return $response->withJson($errorResponse, 400);
     }
-    return $response->withJson($data, 200);
 
+    return $response->withJson($data, 200);
 });
 
-$app->get('/api/decon/getAll', function ($request, $response)
-{
-    //$idTrasaction = $request->getQueryParam('id');
-
+// GET: Get all transactions
+$app->get('/api/decon/getAll', function ($request, $response) {
     $transactionRepository = new TransactionRepository($this->db);
     $data = $transactionRepository->getAll();
+
     if (!$data) {
         $errorResponse = [
             'error' => true,
             'stateCode' => 400,
             'result' => 'No se encontraron Registros'
         ];
-
         return $response->withJson($errorResponse, 400);
     }
-    return $response->withJson($data, 200)
 
+    return $response->withJson($data, 200);
 });
 
-$app->post('/api/decon/AddClient', function ($request, $response)
-{
-    $input =  $request->getParsedBody();
-    $nom= $input["name"];
-    $addr= $input["add"];
-    $cit= $input["city"];
-    $state= $input["state"];
-    $zip= $input["zipcode"];
-    $act= $input["act"];
+// POST: Add a client
+$app->post('/api/decon/AddClient', function ($request, $response) {
+    $input = $request->getParsedBody();
 
+    $nom = $input["name"];
+    $addr = $input["add"];
+    $cit = $input["city"];
+    $state = $input["state"];
+    $zip = $input["zipcode"];
+    $act = $input["act"];
 
     $transactionRepository = new TransactionRepository($this->db);
-    $data = $transactionRepository->Addclient( $nom,  $addr, $cit, $state, $zip, $act);
+    $data = $transactionRepository->addClient($nom, $addr, $cit, $state, $zip, $act);
+
     if (!$data) {
         $errorResponse = [
             'error' => true,
             'stateCode' => 400,
             'result' => 'No se encontraron Registros'
         ];
-
         return $response->withJson($errorResponse, 400);
     }
-    return $response->withJson($data, 200)
 
-
+    return $response->withJson($data, 200);
 });
 
-$app->put('/api/decon/updateClient', function ($request, $response, $args) {
+// PUT: Update a client
+$app->put('/api/decon/updateClient', function ($request, $response) {
     $input = $request->getParsedBody();
     $queryParams = $request->getQueryParams();
-    
-    // Get ID from query string (e.g., ?id=26)
-    $id = isset($queryParams['id']) ? $queryParams['id'] : null;
+
+    $id = $queryParams['id'] ?? null;
 
     if (!$id) {
         return $response->withJson([
@@ -84,7 +82,6 @@ $app->put('/api/decon/updateClient', function ($request, $response, $args) {
         ], 400);
     }
 
-    // Extract other parameters from body
     $nom = $input["name"] ?? null;
     $addr = $input["add"] ?? null;
     $cit = $input["city"] ?? null;
@@ -92,7 +89,6 @@ $app->put('/api/decon/updateClient', function ($request, $response, $args) {
     $zip = $input["zipcode"] ?? null;
     $act = $input["act"] ?? null;
 
-    // Validate required fields
     if (!$nom || !$addr || !$cit || !$state || !$zip || !isset($act)) {
         return $response->withJson([
             'error' => true,
@@ -101,7 +97,6 @@ $app->put('/api/decon/updateClient', function ($request, $response, $args) {
         ], 400);
     }
 
-    // Call the update function
     $transactionRepository = new TransactionRepository($this->db);
     $data = $transactionRepository->Updateclient($nom, $addr, $cit, $state, $zip, $act, $id);
 
@@ -113,11 +108,10 @@ $app->put('/api/decon/updateClient', function ($request, $response, $args) {
         ], 400);
     }
 
-    return $response->withJson($data, 200)
-
+    return $response->withJson($data, 200);
 });
 
-
+// DELETE: Delete a client
 $app->delete('/api/decon/deleteClient', function ($request, $response) {
     $idClient = $request->getQueryParam('id');
 
@@ -131,7 +125,7 @@ $app->delete('/api/decon/deleteClient', function ($request, $response) {
     }
 
     $transactionRepository = new TransactionRepository($this->db);
-    $data = $transactionRepository->deleteClientById(transactionId: $idClient);
+    $data = $transactionRepository->deleteClientById($idClient);
 
     if (!$data) {
         $errorResponse = [
@@ -146,9 +140,5 @@ $app->delete('/api/decon/deleteClient', function ($request, $response) {
         'error' => false,
         'stateCode' => 200,
         'result' => 'Cliente eliminado exitosamente'
-    ], 200)
-
+    ], 200);
 });
-
-
-?>

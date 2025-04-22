@@ -17,7 +17,7 @@ class TransactionRepository
         $sql = "INSERT INTO transactions (
                     transaction_id, amount, currency, login_key_id, reference,
                     url_success, url_cancel, url_fail, url_notification, email, 
-                    forename, surname, phone, address, city, state, country, postal_code, metatrader_id,broker,
+                    forename, surname, phone, address, city, state, country, postal_code, metatrader_id, broker,
                     requestNumber
                 ) VALUES (
                     :transaction_id, :amount, :currency, :login_key_id, :reference,
@@ -48,7 +48,7 @@ class TransactionRepository
             ':postal_code' => $data['postalCode'] ?? null,
             ':metatrader_id' => $data['MetaTraderID']?? null,
             ':broker' => $data['broker'] ?? null,
-            'requestNumber' => $data['RequestNumber'] ?? null
+            ':requestNumber' => $data['RequestNumber'] ?? null
         ]);
     }
 
@@ -60,6 +60,7 @@ class TransactionRepository
         return $stmt->fetch();
     }
 
+    // Función para obtener todos los clientes
     public function getAll()
     {
         $stmt1 = $this->db->prepare("SELECT * FROM clients");
@@ -75,85 +76,84 @@ class TransactionRepository
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
             ':request_json' => $requestJson,
-        ':origin_url' => $originUrl
+            ':origin_url' => $originUrl
         ]);
     }
-      // Función para guardar datos en la tabla de empleados en la base de datos
-      public function Addclient($nom, $add, $cit, $state, $zip, $Act)
-      {
-          $sql = "INSERT INTO clients
-(
-`Name`,
-`Address`,
-`City`,
-`State`,
-`ZipCode`)
-VALUES
-(:name, :address, :city  , :state , :zipcode)";
-  
-          $stmt = $this->db->prepare($sql);
-          $stmt->execute([
-          ':name' => $nom,
-          ':address' => $add, 
-          ':city' => $cit,
-          ':state'=> $state,
-          ':zipcode'=> $zip
-          
-          ]);
-      }
-      public function deleteClientById($transactionId)
+
+    // Función para agregar un cliente en la tabla clients
+    public function addClient($nom, $add, $cit, $state, $zip, $act)
     {
-        $stmt = $this->db->prepare("DELETE FROM clients WHERE clientid = :transaction_id");
-        $stmt->execute([':transaction_id' => $transactionId]);
-        return $stmt->fetch();
+        $sql = "INSERT INTO clients
+                (`Name`, `Address`, `City`, `State`, `ZipCode`, `Active`)
+                VALUES (:name, :address, :city, :state, :zipcode,:active)";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            ':name' => $nom,
+            ':address' => $add, 
+            ':city' => $cit,
+            ':state' => $state,
+            ':zipcode' => $zip,
+            ':active' => $act
+        ]);
     }
 
-    public function Updateclient($nom, $add, $cit, $state, $zip, $act, $id ): void
+    // Función para eliminar un cliente por ID
+    public function deleteClientById($clientId)
+    {
+        $stmt = $this->db->prepare("DELETE FROM clients WHERE clientid = :client_id");
+        $stmt->execute([':client_id' => $clientId]);
+        return $stmt->rowCount() > 0; // Returns true if a row was affected
+    }
+
+    // Función para actualizar un cliente
+    public function updateClient($nom, $add, $cit, $state, $zip, $act, $id)
     {
         $sql = "UPDATE clients SET 
-            
                     `Name` = :name,
                     `Address` = :address,
                     `City` = :city,
                     `State` = :state,
                     `ZipCode` = :zipcode,
-                    `Active`=:act
-
-                    
-                WHERE `ClientID` = :id";  
-
+                    `Active` = :act
+                WHERE `ClientID` = :id";
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
-        ':name' => $nom,
-        ':address' => $add, 
-        ':city' => $cit,
-        ':state'=> $state,
-        ':zipcode'=> $zip,
-        ':act'=> $act,
-        ':id'=> $id
+            ':name' => $nom,
+            ':address' => $add, 
+            ':city' => $cit,
+            ':state' => $state,
+            ':zipcode' => $zip,
+            ':act' => $act,
+            ':id' => $id
         ]);
     }
 
-    public function getAll_Projects()
+    // Función para obtener todos los proyectos
+    public function getAllProjects()
     {
         $stmt1 = $this->db->prepare("SELECT * FROM projects_proposal"); 
         $stmt1->execute();
         return $stmt1->fetchAll();
     }
-    
-    public function Addclient($name, $address, $city, $state, $zipcode, $act)
-{
-    $stmt = $this->db->prepare("INSERT INTO projects_proposal (name, address, city, state, zipcode, activity) VALUES (?, ?, ?, ?, ?, ?)");
-    $result = $stmt->execute([$name, $address, $city, $state, $zipcode, $act]);
 
-    if ($result) {
-        return [
-            'success' => true,
-            'id' => $this->db->lastInsertId()
-        ];
-    } else {
-        return false;
+    // Función para agregar un cliente en la tabla projects_proposal
+    public function addProjectClient($name, $address, $city, $state, $zipcode, $act)
+    {
+        $stmt = $this->db->prepare("INSERT INTO projects_proposal (name, address, city, state, zipcode, activity) 
+                                    VALUES (?, ?, ?, ?, ?, ?)");
+        $result = $stmt->execute([$name, $address, $city, $state, $zipcode, $act]);
+
+        if ($result) {
+            return [
+                'success' => true,
+                'id' => $this->db->lastInsertId()
+            ];
+        } else {
+            return false;
+        }
     }
 }
 
+?>

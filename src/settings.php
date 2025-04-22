@@ -11,7 +11,7 @@
  *
  * @author JPenagos
  */
-return [
+/*return [
     'settings' => [
         'displayErrorDetails' => true, // set to false in production
         'addContentLengthHeader' => false, // Allow the web server to send the content-length header
@@ -23,8 +23,8 @@ return [
             "pass" => "Paulita1"
         ]
     ],
-];
-/*
+];*/
+
 return [
     'settings' => [
         'displayErrorDetails' => true, // set to false in production
@@ -37,4 +37,4 @@ return [
             "pass" => "Paulita@1997"
         ]
     ],
-];*/
+];
