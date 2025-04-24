@@ -15,15 +15,15 @@ class TransactionRepository
     public function saveTransaction($data, $transactionId)
     {
         $sql = "INSERT INTO transactions (
-                    transaction_id, amount, currency, login_key_id, reference,
-                    url_success, url_cancel, url_fail, url_notification, email, 
-                    forename, surname, phone, address, city, state, country, postal_code, metatrader_id, broker,
-                    requestNumber
+                    [transaction_id], [amount], [currency], [login_key_id], [reference],
+                    [url_success], [url_cancel], [url_fail], [url_notification], [email], 
+                    [forename], [surname], [phone], [address], [city], [state], [country], [postal_code], [metatrader_id], [broker],
+                    [requestNumber]
                 ) VALUES (
                     :transaction_id, :amount, :currency, :login_key_id, :reference,
                     :url_success, :url_cancel, :url_fail, :url_notification, :email, 
                     :forename, :surname, :phone, :address, :city, :state, :country, :postal_code, :metatrader_id,
-                    :broker,:requestNumber
+                    :broker, :requestNumber
                 )";
 
         $stmt = $this->db->prepare($sql);
@@ -46,7 +46,7 @@ class TransactionRepository
             ':state' => $data['state'] ?? null,
             ':country' => $data['country'] ?? null,
             ':postal_code' => $data['postalCode'] ?? null,
-            ':metatrader_id' => $data['MetaTraderID']?? null,
+            ':metatrader_id' => $data['MetaTraderID'] ?? null,
             ':broker' => $data['broker'] ?? null,
             ':requestNumber' => $data['RequestNumber'] ?? null
         ]);
@@ -63,15 +63,15 @@ class TransactionRepository
     // Función para obtener todos los clientes
     public function getAll()
     {
-        $stmt1 = $this->db->prepare("SELECT * FROM clients");
-        $stmt1->execute();
-        return $stmt1->fetchAll();
+        $stmt = $this->db->prepare("SELECT * FROM clients");
+        $stmt->execute();
+        return $stmt->fetchAll();
     }
 
     // Función para guardar log de una transacción en la base de datos
     public function saveLogTransaction($requestJson, $originUrl)
     {
-        $sql = "INSERT INTO log_requests (request_json, origin_url) VALUES (:request_json, :origin_url)";
+        $sql = "INSERT INTO log_requests ([request_json], [origin_url]) VALUES (:request_json, :origin_url)";
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
@@ -83,9 +83,13 @@ class TransactionRepository
     // Función para agregar un cliente en la tabla clients
     public function addClient($nom, $add, $cit, $state, $zip, $act)
     {
+        // Provide default values if name or active status is missing
+        $nom = $nom ?? ''; // Default to empty string if name is null
+        $act = $act ?? 1; // Default to 1 (active) if active status is null
+
         $sql = "INSERT INTO clients
-                (`Name`, `Address`, `City`, `State`, `ZipCode`, `Active`)
-                VALUES (:name, :address, :city, :state, :zipcode,:active)";
+                ([Name], [Address], [City], [State], [ZipCode], [Active])
+                VALUES (:name, :address, :city, :state, :zipcode, :active)";
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
@@ -101,49 +105,49 @@ class TransactionRepository
     // Función para eliminar un cliente por ID
     public function deleteClientById($clientId)
     {
-        $stmt = $this->db->prepare("DELETE FROM clients WHERE clientid = :client_id");
+        $stmt = $this->db->prepare("DELETE FROM [dbo].[Clients] WHERE ID = :client_id");
         $stmt->execute([':client_id' => $clientId]);
         return $stmt->rowCount() > 0; // Returns true if a row was affected
     }
 
     // Función para actualizar un cliente
     public function updateClient($nom, $add, $cit, $state, $zip, $act, $id)
-{
-    $sql = "UPDATE clients SET 
-                `Name` = :name,
-                `Address` = :address,
-                `City` = :city,
-                `State` = :state,
-                `ZipCode` = :zipcode,
-                `Active` = :act
-            WHERE `ClientID` = :id";
+    {
+        $sql = "UPDATE [dbo].[Clients] SET 
+                    [Name] = :name1,
+                    [Address] = :address1,
+                    [City] = :city,
+                    [State] = :state1,
+                    [ZipCode] = :zipcode,
+                    [Active] = :act
+                WHERE [ID] = :id";
 
-    $stmt = $this->db->prepare($sql);
-    $stmt->execute([
-        ':name' => $nom,
-        ':address' => $add, 
-        ':city' => $cit,
-        ':state' => $state,
-        ':zipcode' => $zip,
-        ':act' => $act,
-        ':id' => $id
-    ]);
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            ':name1' => $nom,
+            ':address1' => $add, 
+            ':city' => $cit,
+            ':state1' => $state,
+            ':zipcode' => $zip,
+            ':act' => $act,
+            ':id' => $id
+        ]);
 
-    return $stmt->rowCount();
-}
+        return $stmt->rowCount();
+    }
 
     // Función para obtener todos los proyectos
     public function getAllProjects()
     {
-        $stmt1 = $this->db->prepare("SELECT * FROM projects_proposal"); 
-        $stmt1->execute();
-        return $stmt1->fetchAll();
+        $stmt = $this->db->prepare("SELECT * FROM [dbo].[Projects&Proposal]"); 
+        $stmt->execute();
+        return $stmt->fetchAll();
     }
 
     // Función para agregar un cliente en la tabla projects_proposal
-    public function addProjectClient($name, $address, $city, $state, $zipcode, $act)
+    public function addProposalProject($name, $address, $city, $state, $zipcode, $act)
     {
-        $stmt = $this->db->prepare("INSERT INTO projects_proposal (name, address, city, state, zipcode, activity) 
+        $stmt = $this->db->prepare("INSERT INTO [dbo].[Projects&Proposal] ([name], [address], [city], [state], [zipcode], [activity]) 
                                     VALUES (?, ?, ?, ?, ?, ?)");
         $result = $stmt->execute([$name, $address, $city, $state, $zipcode, $act]);
 

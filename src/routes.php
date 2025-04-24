@@ -82,20 +82,20 @@ $app->put('/api/decon/updateClient', function ($request, $response) {
         ], 400);
     }
 
-    $nom = $input["name"] ?? null;
-    $addr = $input["add"] ?? null;
-    $cit = $input["city"] ?? null;
-    $state = $input["state"] ?? null;
-    $zip = $input["zipcode"] ?? null;
-    $act = $input["act"] ?? null;
+    $nom = $input["Name"];
+    $addr = $input["Address"] ?? null;
+    $cit = $input["City"] ?? null;
+    $state = $input["State"] ?? null;
+    $zip = $input["ZipCode"] ?? null;
+    $act = $input["Active"] ?? null;
 
-    if (!$nom || !$addr || !$cit || !$state || !$zip || !isset($act)) {
+    /*if (!$nom || !$addr || !$cit || !$state || !$zip || !isset($act)) {
         return $response->withJson([
             'error' => true,
             'stateCode' => 400,
             'result' => 'Missing required fields'
         ], 400);
-    }
+    }*/
 
     $transactionRepository = new TransactionRepository($this->db);
     $data = $transactionRepository->Updateclient($nom, $addr, $cit, $state, $zip, $act, $id);
