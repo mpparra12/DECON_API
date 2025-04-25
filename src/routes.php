@@ -68,9 +68,9 @@ $app->post('/api/decon/AddClient', function ($request, $response) {
 });
 
 // PUT: Update a client
-$app->put('/api/decon/updateClient', function ($request, $response) {
+$app->post('/api/decon/updateClient', function ($request, $response) {
     $input = $request->getParsedBody();
-    $queryParams = $request->getQueryParams();
+    //$queryParams = $request->getQueryParams();
 
     $id = $queryParams['id'] ?? null;
 
@@ -88,6 +88,7 @@ $app->put('/api/decon/updateClient', function ($request, $response) {
     $state = $input["State"] ?? null;
     $zip = $input["ZipCode"] ?? null;
     $act = $input["Active"] ?? null;
+    $id = $input["ID"];
 
     /*if (!$nom || !$addr || !$cit || !$state || !$zip || !isset($act)) {
         return $response->withJson([
@@ -145,4 +146,21 @@ $app->delete('/api/decon/deleteClient', function ($request, $response) {
         'stateCode' => 200,
         'result' => 'Cliente eliminado exitosamente'
     ], 200);
+});
+
+// GET: Get all projects
+$app->get('/api/decon/getAllProjects', function ($request, $response) {
+    $transactionRepository = new TransactionRepository($this->db);
+    $data = $transactionRepository->getAllProjects();
+
+    if (!$data) {
+        $errorResponse = [
+            'error' => true,
+            'stateCode' => 400,
+            'result' => 'No se encontraron Registros'
+        ];
+        return $response->withJson($errorResponse, 400);
+    }
+
+    return $response->withJson($data, 200);
 });
