@@ -87,7 +87,7 @@ class TransactionRepository
         $nom = $nom ?? ''; // Default to empty string if name is null
         $act = $act ?? 1; // Default to 1 (active) if active status is null
 
-        $sql = "INSERT INTO clients
+        $sql = "INSERT INTO [dbo].[clients]
                 ([Name], [Address], [City], [State], [ZipCode], [Active])
                 VALUES (:name, :address, :city, :state, :zipcode, :active)";
 
