@@ -69,18 +69,20 @@ $app->post('/api/decon/AddClient', function ($request, $response) {
 
 // PUT: Update a client
 $app->post('/api/decon/updateClient', function ($request, $response) {
+
+
     $input = $request->getParsedBody();
-    //$queryParams = $request->getQueryParams();
+  //  $queryParams = $request->getQueryParams();
 
-    $id = $queryParams['id'] ?? null;
+  //  $id = $queryParams['id'] ?? null;
 
-    if (!$id) {
+   /* if (!$id) {
         return $response->withJson([
             'error' => true,
             'stateCode' => 400,
             'result' => 'Missing ID in request'
         ], 400);
-    }
+    }*/
 
     $nom = $input["Name"];
     $addr = $input["Address"] ?? null;
@@ -88,7 +90,7 @@ $app->post('/api/decon/updateClient', function ($request, $response) {
     $state = $input["State"] ?? null;
     $zip = $input["ZipCode"] ?? null;
     $act = $input["Active"] ?? null;
-    $id = $input["ID"];
+    $id = $input['ID'];
 
     /*if (!$nom || !$addr || !$cit || !$state || !$zip || !isset($act)) {
         return $response->withJson([
@@ -113,7 +115,7 @@ $app->post('/api/decon/updateClient', function ($request, $response) {
         'error' => false,
         'stateCode' => 200,
         'result' => "Client ID $id updated successfully"
-    ], 200);
+    ],200);
 });
 
 // DELETE: Delete a client
