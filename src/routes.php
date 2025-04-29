@@ -41,19 +41,47 @@ $app->get('/api/decon/getAll', function ($request, $response) {
     return $response->withJson($data, 200);
 });
 
+///
+// GET: Get Project QA-QC 
+$app->get('/api/decon/getProjectQAQC', function ($request, $response) {
+    $transactionRepository = new TransactionRepository($this->db);
+    $data = $transactionRepository->getProjectQAQC();
+
+    if (!$data) {
+        $errorResponse = [
+            'error' => true,
+            'stateCode' => 400,
+            'result' => 'No se encontraron Registros'
+        ];
+        return $response->withJson($errorResponse, 400);
+    }
+
+    return $response->withJson($data, 200);
+});
+
+///
+
+
+
 // POST: Add a client
 $app->post('/api/decon/AddClient', function ($request, $response) {
     $input = $request->getParsedBody();
 
-    $nom = $input["name"];
-    $addr = $input["add"];
-    $cit = $input["city"];
-    $state = $input["state"];
-    $zip = $input["zipcode"];
-    $act = $input["act"];
+    $nom = $input["Name"];
+    $addr = $input["Address"];
+    $cit = $input["City"];
+    $state = $input["State"];
+    $zip = $input["ZipCode"];
+    $act = $input["Active"];
+    $country=$input["Country"];
+    $doc=$input["Documents_and_other_requirements"];
+    $inv=$input["Invoice_Date"];
+    $logo=$input["Logo"];
+    $per=$input["Period_of_Invoice"];
+    $proc=$input["Procedure"];
 
     $transactionRepository = new TransactionRepository($this->db);
-    $data = $transactionRepository->addClient($nom, $addr, $cit, $state, $zip, $act);
+    $data = $transactionRepository->addClient($nom, $addr, $cit, $state, $zip, $act, $country, $doc, $inv, $logo, $per, $proc);
 
     if (!$data) {
         $errorResponse = [
@@ -115,21 +143,23 @@ $app->post('/api/decon/updateClient', function ($request, $response) {
         'error' => false,
         'stateCode' => 200,
         'result' => "Client ID $id updated successfully"
-    ],200);
+    ], 200);
 });
 
-// DELETE: Delete a client
-$app->delete('/api/decon/deleteClient', function ($request, $response) {
-    $idClient = $request->getQueryParam('id');
+// DELETE: Delete a client 
+$app->post('/api/decon/deleteClient', function ($request, $response) {
+    $input = $request->getParsedBody();
+    $idClient = $input['ID'];
+   // $idClient = $request->getQueryParam('ID');
 
-    if (!$idClient) {
+ /*   if (!$idClient) {
         $errorResponse = [
             'error' => true,
             'stateCode' => 400,
             'result' => 'ID del cliente es requerido'
         ];
         return $response->withJson($errorResponse, 400);
-    }
+    }*/
 
     $transactionRepository = new TransactionRepository($this->db);
     $data = $transactionRepository->deleteClientById($idClient);
@@ -148,21 +178,4 @@ $app->delete('/api/decon/deleteClient', function ($request, $response) {
         'stateCode' => 200,
         'result' => 'Cliente eliminado exitosamente'
     ], 200);
-});
-
-// GET: Get all projects
-$app->get('/api/decon/getAllProjects', function ($request, $response) {
-    $transactionRepository = new TransactionRepository($this->db);
-    $data = $transactionRepository->getAllProjects();
-
-    if (!$data) {
-        $errorResponse = [
-            'error' => true,
-            'stateCode' => 400,
-            'result' => 'No se encontraron Registros'
-        ];
-        return $response->withJson($errorResponse, 400);
-    }
-
-    return $response->withJson($data, 200);
 });

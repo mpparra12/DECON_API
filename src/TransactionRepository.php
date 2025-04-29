@@ -68,6 +68,14 @@ class TransactionRepository
         return $stmt->fetchAll();
     }
 
+    // Función para obtener todos los proyectos Activos para QAQC
+    public function getProjectQAQC()
+    {
+        $stmt = $this->db->prepare("SELECT * FROM Projects&Proposal where Category="Contrated" And Status = "Under Production"");
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
     // Función para guardar log de una transacción en la base de datos
     public function saveLogTransaction($requestJson, $originUrl)
     {
@@ -84,12 +92,12 @@ class TransactionRepository
     public function addClient($nom, $add, $cit, $state, $zip, $act)
     {
         // Provide default values if name or active status is missing
-        $nom = $nom ?? ''; // Default to empty string if name is null
-        $act = $act ?? 1; // Default to 1 (active) if active status is null
+       // $nom = $nom ?? ''; // Default to empty string if name is null
+        //$act = $act ?? 1; // Default to 1 (active) if active status is null
 
-        $sql = "INSERT INTO [dbo].[clients]
-                ([Name], [Address], [City], [State], [ZipCode], [Active])
-                VALUES (:name, :address, :city, :state, :zipcode, :active)";
+        $sql = "INSERT INTO clients
+                ([Name], [Address], [City], [State], [ZipCode], [Active],[Country],[Documents_and_other_requirements],[Invoice_Date],[Logo],[Period_of_Invoice],[Procedure])
+                VALUES (:name, :address, :city, :state, :zipcode, :active,:count,:doc1, :inv1, :logo1, :per1, :proc1)";
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
@@ -98,13 +106,20 @@ class TransactionRepository
             ':city' => $cit,
             ':state' => $state,
             ':zipcode' => $zip,
-            ':active' => $act
+            ':active' => $act,
+            ':count' => $country,
+           ':doc1' => $doc,
+          ':inv1' => $inv,
+          ':logo1' => $logo,
+          ':per1' => $per,
+          ':proc1' => $proc,
         ]);
     }
 
     // Función para eliminar un cliente por ID
     public function deleteClientById($clientId)
     {
+      //console.log(clientId);
         $stmt = $this->db->prepare("DELETE FROM [dbo].[Clients] WHERE ID = :client_id");
         $stmt->execute([':client_id' => $clientId]);
         return $stmt->rowCount() > 0; // Returns true if a row was affected
