@@ -71,8 +71,13 @@ class TransactionRepository
     // Función para obtener todos los proyectos Activos para QAQC
     public function getProjectQAQC()
     {
-        $stmt = $this->db->prepare("SELECT * FROM Projects&Proposal where Category="Contrated" And Status = "Under Production"");
-        $stmt->execute();
+       $category="Contrated";
+       $status="Under Production";
+        $stmt = $this->db->prepare("SELECT * FROM Projects&Proposal where Category=:category And Status = :status");
+        $stmt->execute([
+         ':category' => $category
+         ':status' => $status
+]);
         return $stmt->fetchAll();
     }
 
@@ -154,6 +159,7 @@ class TransactionRepository
     // Función para obtener todos los proyectos
     public function getAllProjects()
     {
+ 
         $stmt = $this->db->prepare("SELECT * FROM [dbo].[Projects&Proposal]"); 
         $stmt->execute();
         return $stmt->fetchAll();

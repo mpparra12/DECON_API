@@ -45,8 +45,8 @@ $app->get('/api/decon/getAll', function ($request, $response) {
 // GET: Get Project QA-QC 
 $app->get('/api/decon/getProjectQAQC', function ($request, $response) {
     $transactionRepository = new TransactionRepository($this->db);
-    $data = $transactionRepository->getProjectQAQC();
-
+  $data = $transactionRepository->getAllProjects();
+  // $data = $transactionRepository->getProjectQAQC();
     if (!$data) {
         $errorResponse = [
             'error' => true,
