@@ -61,6 +61,43 @@ $app->get('/api/decon/getProjectQAQC', function ($request, $response) {
 
 ///
 
+// GET: Get Proposals 
+$app->get('/api/decon/getAllProposals', function ($request, $response) {
+    $transactionRepository = new TransactionRepository($this->db);
+  $data = $transactionRepository->getAllProposals();
+  // $data = $transactionRepository->getProjectQAQC();
+    if (!$data) {
+        $errorResponse = [
+            'error' => true,
+            'stateCode' => 400,
+            'result' => 'No se encontraron Registros'
+        ];
+        return $response->withJson($errorResponse, 400);
+    }
+
+    return $response->withJson($data, 200);
+});
+
+// GET: Get transaction by Project Name
+$app->get('/api/decon/getTransbyProjectName', function ($request, $response) {
+    $idTransaction = $request->getQueryParam('ProjectName');
+
+    $transactionRepository = new TransactionRepository($this->db);
+    $data = $transactionRepository->getTransByProjectName($idTransaction);
+
+    if (!$data) {
+        $errorResponse = [
+            'error' => true,
+            'stateCode' => 400,
+            'result' => 'No se encontraron Registros'
+        ];
+        return $response->withJson($errorResponse, 400);
+    }
+
+    return $response->withJson($data, 200);
+});
+
+
 
 
 // POST: Add a client

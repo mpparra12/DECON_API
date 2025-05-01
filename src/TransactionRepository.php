@@ -60,6 +60,14 @@ class TransactionRepository
         return $stmt->fetch();
     }
 
+    // Función para obtener una transacción por Project Name
+    public function getTransByProjectName($transactionId)
+    {
+        $stmt = $this->db->prepare("SELECT * FROM QCProcess WHERE ProjectNam = :transaction_id");
+        $stmt->execute([':transaction_id' => $transactionId]);
+        return $stmt->fetch();
+    }
+
     // Función para obtener todos los clientes
     public function getAll()
     {
@@ -157,7 +165,7 @@ class TransactionRepository
     }
 
     // Función para obtener todos los proyectos
-    public function getAllProjects()
+    public function getAllProposals()
     {
  
         $stmt = $this->db->prepare("SELECT * FROM [dbo].[Projects&Proposal]"); 
