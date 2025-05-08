@@ -1,31 +1,31 @@
 <?php
-
+ 
 class TransactionRepository
 {
     // Almacena la conexión PDO
     protected $db;
-
+ 
     // Constructor que recibe la conexión de la base de datos (PDO)
     public function __construct(PDO $db)
     {
         $this->db = $db;
     }
-
+ 
     // Función para guardar una transacción en la base de datos
     public function saveTransaction($data, $transactionId)
     {
         $sql = "INSERT INTO transactions (
                     [transaction_id], [amount], [currency], [login_key_id], [reference],
-                    [url_success], [url_cancel], [url_fail], [url_notification], [email], 
+                    [url_success], [url_cancel], [url_fail], [url_notification], [email],
                     [forename], [surname], [phone], [address], [city], [state], [country], [postal_code], [metatrader_id], [broker],
                     [requestNumber]
                 ) VALUES (
                     :transaction_id, :amount, :currency, :login_key_id, :reference,
-                    :url_success, :url_cancel, :url_fail, :url_notification, :email, 
+                    :url_success, :url_cancel, :url_fail, :url_notification, :email,
                     :forename, :surname, :phone, :address, :city, :state, :country, :postal_code, :metatrader_id,
                     :broker, :requestNumber
                 )";
-
+ 
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
             ':transaction_id' => $transactionId,
@@ -51,23 +51,17 @@ class TransactionRepository
             ':requestNumber' => $data['RequestNumber'] ?? null
         ]);
     }
-
-    // Función para obtener una transacción por ID
+ 
+///////     LISTAR   ////////
+ 
+    // Función para obtener Cliente  por el ID
     public function getTransactionById($transactionId)
     {
         $stmt = $this->db->prepare("SELECT * FROM clients WHERE clientid = :transaction_id");
         $stmt->execute([':transaction_id' => $transactionId]);
         return $stmt->fetch();
     }
-
-    // Función para obtener una transacción por Project Name
-    public function getTransByProjectName($transactionId)
-    {
-        $stmt = $this->db->prepare("SELECT * FROM QCProcess WHERE ProjectNam = :transaction_id");
-        $stmt->execute([':transaction_id' => $transactionId]);
-        return $stmt->fetch();
-    }
-
+ 
     // Función para obtener todos los clientes
     public function getAll()
     {
@@ -75,47 +69,138 @@ class TransactionRepository
         $stmt->execute();
         return $stmt->fetchAll();
     }
-
+    // Función para obtener todos los Employee
+    public function getEmployee()
+    {
+        $stmt = $this->db->prepare("SELECT * FROM [dbo].[User]");
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+    // Función para obtener todos las Propuestas
+    public function getAllProposals()
+    {
+ 
+        $stmt = $this->db->prepare("SELECT * FROM [dbo].[Projects&Proposal]");
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+    // Función para obtener todos los proyectos
+    public function getAllProjects()
+    {
+ 
+        $stmt = $this->db->prepare("SELECT * FROM [dbo].[Projects&Proposal] where Category='Contrated'");
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+ 
     // Función para obtener todos los proyectos Activos para QAQC
     public function getProjectQAQC()
     {
-       $category="Contrated";
-       $status="Under Production";
-        $stmt = $this->db->prepare("SELECT * FROM Projects&Proposal where Category=:category And Status = :status");
-        $stmt->execute([
-         ':category' => $category
-         ':status' => $status
-]);
+ 
+        $stmt = $this->db->prepare("SELECT * FROM [dbo].[Projects&Proposal] where Category='Contrated' AND Status='Under Production'");
+        $stmt->execute();
         return $stmt->fetchAll();
     }
 
+    // Función para obtener todos los años
+    public function getbyYear()
+    {
+        $stmt = $this->db->prepare("SELECT distinct Year FROM Projects&Proposal");
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    // Función para obtener all market
+    public function getAllMarket()
+    {
+        $stmt = $this->db->prepare("SELECT * FROM TypeMarket");
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    // Función para obtener all Type Project
+    public function getAllTypeProject()
+    {
+        $stmt = $this->db->prepare("SELECT * FROM TypeProject");
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    // Función para obtener All Type Service Line
+    public function getAllTypeServiceLine()
+    {
+        $stmt = $this->db->prepare("SELECT * FROM TypeServiceLine");
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    // Función para obtener all Type Status Project
+    public function getAllTypeStatusProject()
+    {
+        $stmt = $this->db->prepare("SELECT * FROM TypeStatusProject");
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    /// Función para obtener all Status proposal
+    public function getAllStatusProposal()
+    {
+        $stmt = $this->db->prepare("SELECT * FROM TypeStatusProposal");
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    /// Función para obtener all Status proposal
+    public function getAllNoProposal()
+    {
+        $stmt = $this->db->prepare("SELECT NoProposal * FROM Projects&Proposal where NoProposal is not null AND NoProposal <>''");
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+      // Función para obtener Proposal Num by ID
+      public function getByProposalNum($transactionId)
+      {
+          $stmt = $this->db->prepare("SELECT * FROM Projects&Proposal WHERE NoProposal = :transaction_id");
+          $stmt->execute([':transaction_id' => $transactionId]);
+          return $stmt->fetch();
+      }
+
+      // Función para obtener todos los project details
+    public function getAllProjectDetails()
+    {
+        $stmt = $this->db->prepare("SELECT * FROM ClientDetailProject");
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+ 
+///////     ADICIONAR   ////////
+ 
     // Función para guardar log de una transacción en la base de datos
     public function saveLogTransaction($requestJson, $originUrl)
     {
         $sql = "INSERT INTO log_requests ([request_json], [origin_url]) VALUES (:request_json, :origin_url)";
-
+ 
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
             ':request_json' => $requestJson,
             ':origin_url' => $originUrl
         ]);
     }
-
+ 
     // Función para agregar un cliente en la tabla clients
-    public function addClient($nom, $add, $cit, $state, $zip, $act)
+    public function addClient($nom, $add, $cit, $state, $zip, $act,$country, $doc, $inv, $logo, $per, $proc)
+   
     {
-        // Provide default values if name or active status is missing
-       // $nom = $nom ?? ''; // Default to empty string if name is null
-        //$act = $act ?? 1; // Default to 1 (active) if active status is null
-
+ 
         $sql = "INSERT INTO clients
                 ([Name], [Address], [City], [State], [ZipCode], [Active],[Country],[Documents_and_other_requirements],[Invoice_Date],[Logo],[Period_of_Invoice],[Procedure])
                 VALUES (:name, :address, :city, :state, :zipcode, :active,:count,:doc1, :inv1, :logo1, :per1, :proc1)";
-
+ 
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
             ':name' => $nom,
-            ':address' => $add, 
+            ':address' => $add,
             ':city' => $cit,
             ':state' => $state,
             ':zipcode' => $zip,
@@ -128,7 +213,154 @@ class TransactionRepository
           ':proc1' => $proc,
         ]);
     }
+ 
+ 
+///////     ACTUALIZAR   ////////
+ 
+ 
+    // Función para actualizar un cliente
+    public function updateClient($nom, $add, $cit, $state, $zip, $act, $id)
+    {
+        $sql = "UPDATE [dbo].[Clients] SET
+                    [Name] = :name1,
+                    [Address] = :address1,
+                    [City] = :city,
+                    [State] = :state1,
+                    [ZipCode] = :zipcode,
+                    [Active] = :act
+                WHERE [ID] = :id";
+ 
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            ':name1' => $nom,
+            ':address1' => $add,
+            ':city' => $cit,
+            ':state1' => $state,
+            ':zipcode' => $zip,
+            ':act' => $act,
+            ':id' => $id
+        ]);
+ 
+        return $stmt->rowCount();
+    }
 
+    // Función para actualizar proposal
+
+public function updateProposal($nom, $cat, $des, $con, $est, $year, $pro, $id, $nopro, $country, $proreq, $prosub, $scope, $statpro )
+    {
+        $sql = "UPDATE [dbo].[Projects&Proposal] SET
+                        ([Name]=:name, 
+                        [Category]= :category, 
+                        [ProjectDescription]= :projectdescription, 
+                        [ContractValue]= :contractvalue, 
+                        [EstimatedHours]= :estimatedhours, 
+                        [Year]= :year,
+                        [Proposal]= :proposal,
+                        [NoProposal]= :noproposal,
+                        [Country]= :country,
+                        [ProposalRequestDate]= :proposalrequestdate,
+                        [ProposalSubmitted]= :proposalsubmitted,
+                        [Scope]=  :scope,
+                        [StatusProp]= :statusprop)
+
+                WHERE [ID] = :id";
+ 
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            ':name' => $nom,
+            ':category' => $cat,
+            ':projectdescription' => $des,
+            ':contractvalue' => $con,
+            ':estimatedhours' => $est,
+            ':year' => $year,
+            ':proposal' => $pro,
+            ':noproposal' => $nopro,
+            ':country' => $country,
+            ':proposalrequestdate' => $proreq,
+            ':proposalsubmitted' => $prosub,
+            ':scope' => $scope,
+            ':statusprop' => $statpro,
+        ]);
+ 
+        return $stmt->rowCount();
+    }
+    
+    // Función para actualizar proposal to Project
+    public function updateProposaltoProject($nom, $cat, $des, $con, $est, $year, $pro, $id, $nopro, $country, $proreq, $prosub, $scope, $statpro )
+    {
+        $sql = "UPDATE [dbo].[Projects&Proposal] SET
+                        ([ProjectName]=:projectname, 
+                        [Project]= :project, 
+                        [ProjectDescription]= :projectdescription, 
+                        [ContractValue]= :contractvalue, 
+                        [SubProject]= :subproject, 
+                        [Task]= :task,
+                        [DeparmentManager]= :deparmentmanager,
+                        [AwardDate]= :awarddate,
+                        [Status]= :status,
+                        [Category]= :category,
+                        [ProjectType]= :projecttype,
+                        [Scope]=  :scope, 
+                        [Estimated_h]= :estimatedh,
+                        [PM]= :pm,
+                        [Discipline]= :discipline,
+                        [Market] = :market, 
+                        [ServiceEng] = :serviceeng,
+                        [IdProjectType] = :idprojecttype)
+
+                WHERE [ID] = :id";
+ 
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            ':name' => $nom,
+            ':category' => $cat,
+            ':projectdescription' => $des,
+            ':contractvalue' => $con,
+            ':estimatedhours' => $est,
+            ':year' => $year,
+            ':proposal' => $pro,
+            ':noproposal' => $nopro,
+            ':country' => $country,
+            ':proposalrequestdate' => $proreq,
+            ':proposalsubmitted' => $prosub,
+            ':scope' => $scope,
+            ':statusprop' => $statpro,
+        ]);
+ 
+        return $stmt->rowCount();
+    }
+    
+
+    
+ 
+// Función para agregar un proposal
+public function addProposal($nom, $cat, $des, $con, $est, $year, $pro, $nopro, $country, $proreq, $prosub, $scope, $statpro)
+{
+ 
+    $sql = "INSERT INTO [dbo].[Projects&Proposal]
+            ([Name], [Category], [ProjectDescription], [ContractValue], [EstimatedHours], [Year],[Proposal],[NoProposal],[Country],[ProposalRequestDate],[ProposalSubmitted],[Scope],[StatusProp])
+            VALUES (:name, :category, :projectdescription, :contractvalue, :estimatedhours, :year, :proposal,:noproposal, :country, :proposalrequestdate, :proposalsubmitted, :scope, :statusprop)";
+ 
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute([
+        ':name' => $nom,
+        ':category' => $cat,
+        ':projectdescription' => $des,
+        ':contractvalue' => $con,
+        ':estimatedhours' => $est,
+        ':year' => $year,
+        ':proposal' => $pro,
+       ':noproposal' => $nopro,
+      ':country' => $country,
+      ':proposalrequestdate' => $proreq,
+      ':proposalsubmitted' => $prosub,
+      ':scope' => $scope,
+      ':statusprop' => $statpro,
+    ]);
+}
+ 
+///////     ELIMINAR   ////////
+ 
     // Función para eliminar un cliente por ID
     public function deleteClientById($clientId)
     {
@@ -137,58 +369,7 @@ class TransactionRepository
         $stmt->execute([':client_id' => $clientId]);
         return $stmt->rowCount() > 0; // Returns true if a row was affected
     }
-
-    // Función para actualizar un cliente
-    public function updateClient($nom, $add, $cit, $state, $zip, $act, $id)
-    {
-        $sql = "UPDATE [dbo].[Clients] SET 
-                    [Name] = :name1,
-                    [Address] = :address1,
-                    [City] = :city,
-                    [State] = :state1,
-                    [ZipCode] = :zipcode,
-                    [Active] = :act
-                WHERE [ID] = :id";
-
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([
-            ':name1' => $nom,
-            ':address1' => $add, 
-            ':city' => $cit,
-            ':state1' => $state,
-            ':zipcode' => $zip,
-            ':act' => $act,
-            ':id' => $id
-        ]);
-
-        return $stmt->rowCount();
-    }
-
-    // Función para obtener todos los proyectos
-    public function getAllProposals()
-    {
- 
-        $stmt = $this->db->prepare("SELECT * FROM [dbo].[Projects&Proposal]"); 
-        $stmt->execute();
-        return $stmt->fetchAll();
-    }
-
-    // Función para agregar un cliente en la tabla projects_proposal
-    public function addProposalProject($name, $address, $city, $state, $zipcode, $act)
-    {
-        $stmt = $this->db->prepare("INSERT INTO [dbo].[Projects&Proposal] ([name], [address], [city], [state], [zipcode], [activity]) 
-                                    VALUES (?, ?, ?, ?, ?, ?)");
-        $result = $stmt->execute([$name, $address, $city, $state, $zipcode, $act]);
-
-        if ($result) {
-            return [
-                'success' => true,
-                'id' => $this->db->lastInsertId()
-            ];
-        } else {
-            return false;
-        }
-    }
 }
-
+ 
 ?>
+ 
