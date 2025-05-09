@@ -59,6 +59,40 @@ $app->get('/api/decon/getEmployee', function ($request, $response) {
  
     return $response->withJson($data, 200);
 });
+
+// GET: Get all employees Manager
+$app->get('/api/decon/getManager', function ($request, $response) {
+    $transactionRepository = new TransactionRepository($this->db);
+    $data = $transactionRepository->getManager();
+ 
+    if (!$data) {
+        $errorResponse = [
+            'error' => true,
+            'stateCode' => 400,
+            'result' => 'No se encontraron Registros'
+        ];
+        return $response->withJson($errorResponse, 400);
+    }
+ 
+    return $response->withJson($data, 200);
+});
+
+// GET: Get all employees PM
+$app->get('/api/decon/getPM', function ($request, $response) {
+    $transactionRepository = new TransactionRepository($this->db);
+    $data = $transactionRepository->getPM();
+ 
+    if (!$data) {
+        $errorResponse = [
+            'error' => true,
+            'stateCode' => 400,
+            'result' => 'No se encontraron Registros'
+        ];
+        return $response->withJson($errorResponse, 400);
+    }
+ 
+    return $response->withJson($data, 200);
+});
  
 // GET: Get Project QA-QC
 $app->get('/api/decon/getProjectQAQC', function ($request, $response) {
@@ -251,10 +285,13 @@ $app->get('/api/decon/getAllStatusProposal', function ($request, $response) {
     return $response->withJson($data, 200);
 });
 
-// GET: Get all Type Status Proposal
+// GET: Get Num Proposal by year
+
 $app->get('/api/decon/getAllNoProposal', function ($request, $response) {
+    $idTransaction = $request->getQueryParam('Year');
+ 
     $transactionRepository = new TransactionRepository($this->db);
-    $data = $transactionRepository->getAllNoProposal();
+    $data = $transactionRepository->getAllNoProposal($idTransaction);
  
     if (!$data) {
         $errorResponse = [
@@ -267,6 +304,29 @@ $app->get('/api/decon/getAllNoProposal', function ($request, $response) {
  
     return $response->withJson($data, 200);
 });
+
+// GET: Get Last Num Proposal by Name
+
+$app->get('/api/decon/getLastProposalNum', function ($request, $response) {
+    $idTransaction = $request->getQueryParam('Name');
+ 
+    $transactionRepository = new TransactionRepository($this->db);
+    $data = $transactionRepository->getLastProposalNum($idTransaction);
+ 
+    if (!$data) {
+        $errorResponse = [
+            'error' => true,
+            'stateCode' => 400,
+            'result' => 'No se encontraron Registros'
+        ];
+        return $response->withJson($errorResponse, 400);
+    }
+ 
+    return $response->withJson($data, 200);
+});
+
+
+
 
 // GET: Get all Project Details
 $app->get('/api/decon/getAllProjectDetails', function ($request, $response) {
@@ -432,17 +492,46 @@ $app->post('/api/decon/updateProposaltoProject', function ($request, $response) 
  
  
     $input = $request->getParsedBody();
-    $nom = $input["Name"];
-    $add = $input["Address"] ?? null;
-    $cit = $input["City"] ?? null;
-    $state = $input["State"] ?? null;
-    $zip = $input["Z"] ?? null;
-    $act = $input["Year"] ?? null;
-    $id = $input['ID'];
-
+    $Client= $input["Client"];
+    $selectedClient= $input["selectedClient"] ?? null;
+    $selectedEmployee= $input["selectedEmployee"] ?? null;
+    $AgreementNo= $input["AgreementNo"] ?? null;
+    $ClientProject= $input["ClientProject"] ?? null;
+    $ClientProjectCost= $input["ClientProjectCost"] ?? null;
+    $selectedFP= $input['selectedFP'];
+    $ProjectCSJ= $input['ProjectCSJ'];
+    $State= $input['State'];
+    $County= $input['County'];
+    $City= $input['City'];
+    $HighwayNo= $input['HighwayNo'];
+    $Owner= $input['Owner'];
+    $Segment= $input['Segment'];
+    $Bridge= $input['Bridge'];
+    $yearFP= $input['yearFP'];
+    $Contact= $input['Contact'];
+    $FP= $input['FP'];
+    $ProjectName= $input['ProjectName'];
+    $ProjectScope= $input['ProjectScope'];
+    $DepartmentManager= $input['DepartmentManager'];
+    $ProjectManager= $input['ProjectManager'];
+    $DECONProjectType= $input['DECONProjectType'];
+    $Task= $input['Task'];
+    $Market= $input['Market'];
+    $MainServiceLine= $input['MainServiceLine'];
+    $EngineeringService= $input['EngineeringService'];
+    $FPRequestedDate= $input['FPRequestedDate'];
+    $FPSenttoClien= $input['FPSenttoClien'];
+    $NTPDate= $input['NTPDate'];
+    $ProjectFee= $input['ProjectFee'];
+    $DueDate= $input['DueDate'];
+    $Project= $input['Project'];
+    $SubProject= $input['SubProject'];
+    $Status= $input['Status'];
+    $Category= $input['Category'];   
+    $ID= $input['ID'];
 
     $transactionRepository = new TransactionRepository($this->db);
-    $data = $transactionRepository->updateProposaltoProject($nom, $add, $cit, $state, $zip, $act, $id);
+    $data = $transactionRepository->updateProposaltoProject( $Client, $selectedClient,$selectedEmployee, $AgreementNo, $ClientProject, $ClientProjectCost, $selectedFP, $ProjectCSJ, $State, $County, $City, $HighwayNo, $Owner,$Segment, $Bridge, $Contact, $yearFP,  $FP, $ProjectName, $ProjectScope, $DepartmentManager,  $ProjectManager, $Task, $DECONProjectType, $Market, $MainServiceLine, $EngineeringService, $FPRequestedDate, $FPSenttoClien, $NTPDate, $ProjectFee, $ID, $DueDate, $Project, $SubProject, $Status,$Category);
  
     if ($data === 0) {
         return $response->withJson([
@@ -455,7 +544,7 @@ $app->post('/api/decon/updateProposaltoProject', function ($request, $response) 
  return $response->withJson([
         'error' => false,
         'stateCode' => 200,
-        'result' => "Client ID $id updated successfully"
+        'result' => "Client ID $ID updated successfully"
     ], 200);
 });
 

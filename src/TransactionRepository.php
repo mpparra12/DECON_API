@@ -76,6 +76,24 @@ class TransactionRepository
         $stmt->execute();
         return $stmt->fetchAll();
     }
+
+    // Función para obtener todos los Employee
+    public function getManager()
+    {
+        $stmt = $this->db->prepare("SELECT * FROM [dbo].[User] where DM='1' ");
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    // Función para obtener todos los Employee
+    public function getPM()
+    {
+        $stmt = $this->db->prepare("SELECT * FROM [dbo].[User] where PM='1' ");
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+
     // Función para obtener todos las Propuestas
     public function getAllProposals()
     {
@@ -105,7 +123,7 @@ class TransactionRepository
     // Función para obtener todos los años
     public function getbyYear()
     {
-        $stmt = $this->db->prepare("SELECT distinct Year FROM Projects&Proposal");
+        $stmt = $this->db->prepare("SELECT distinct Year FROM [dbo].[Projects&Proposal]");
         $stmt->execute();
         return $stmt->fetchAll();
     }
@@ -151,29 +169,36 @@ class TransactionRepository
     }
 
     /// Función para obtener all Status proposal
-    public function getAllNoProposal()
+    public function getAllNoProposal($transactionId)
     {
-        $stmt = $this->db->prepare("SELECT NoProposal * FROM Projects&Proposal where NoProposal is not null AND NoProposal <>''");
-        $stmt->execute();
+        $stmt = $this->db->prepare("SELECT * FROM [dbo].[Projects&Proposal] where NoProposal is not null AND NoProposal <>'' AND Year= :transaction_id");
+        $stmt->execute([':transaction_id' => $transactionId]);
         return $stmt->fetchAll();
     }
 
       // Función para obtener Proposal Num by ID
       public function getByProposalNum($transactionId)
       {
-          $stmt = $this->db->prepare("SELECT * FROM Projects&Proposal WHERE NoProposal = :transaction_id");
+          $stmt = $this->db->prepare("SELECT * FROM [dbo].[Projects&Proposal] WHERE NoProposal = :transaction_id");
           $stmt->execute([':transaction_id' => $transactionId]);
           return $stmt->fetch();
       }
 
-      // Función para obtener todos los project details
+      public function getLastProposalNum($transactionId)
+      {
+          $stmt = $this->db->prepare("SELECT * FROM [dbo].[LastProjectProposal] WHERE Name = :transaction_id");
+          $stmt->execute([':transaction_id' => $transactionId]);
+          return $stmt->fetch();
+      }      
+ 
+// Función para obtener todos los project details
     public function getAllProjectDetails()
     {
         $stmt = $this->db->prepare("SELECT * FROM ClientDetailProject");
         $stmt->execute();
         return $stmt->fetchAll();
     }
- 
+
 ///////     ADICIONAR   ////////
  
     // Función para guardar log de una transacción en la base de datos
@@ -214,7 +239,32 @@ class TransactionRepository
         ]);
     }
  
+    // Función para agregar un cliente en la tabla clients
+    //public function addProposal($nom, $cat, $des, $con, $est, $year, $country, $pro, $nopro, $proreq, $prosub, $statpro, $scope )
+   
+    //{
  
+        //$sql = "INSERT INTO [Projects&Proposal]
+                //([ClientName], [Category], [ProjectDescription], [ContractValue], [Estimated_h], [Year],[Country],[Proposal],[NoProposal],[ProposalRequestDate],[ProposalSubmitted],[StatusProp],[Scope])
+                //VALUES (:nom, :cat, :des, :con, :est, :year,:country,:pro, :nopro, :proreq, :prosub, :statpro,:scope )";
+ 
+        //$stmt = $this->db->prepare($sql);
+        //$stmt->execute([
+            //':nom' => $nom,
+            //':cat' => $cat,
+            //':des' => $des,
+            //':con' => $con,
+            //':est' => $est,
+            //':year' => $year,
+            //':country' => $country,
+           //':pro' => $pro,
+          //':nopro' => $nopro,
+          //':proreq' => $proreq,
+          //':prosub' => $prosub,
+          //':statpro' => $statpro,
+         //':scope ' => $scope ,
+        //]);
+    //}
 ///////     ACTUALIZAR   ////////
  
  
@@ -286,45 +336,70 @@ public function updateProposal($nom, $cat, $des, $con, $est, $year, $pro, $id, $
     }
     
     // Función para actualizar proposal to Project
-    public function updateProposaltoProject($nom, $cat, $des, $con, $est, $year, $pro, $id, $nopro, $country, $proreq, $prosub, $scope, $statpro )
+    public function updateProposaltoProject( $Client, $selectedClient,$selectedEmployee, $AgreementNo, $ClientProject, $ClientProjectCost, $selectedFP, $ProjectCSJ, $State, $County, $City, $HighwayNo, $Owner,$Segment, $Bridge, $Contact, $yearFP,  $FP, $ProjectName, $ProjectScope, $DepartmentManager,  $ProjectManager, $Task, $DECONProjectType, $Market, $MainServiceLine, $EngineeringService, $FPRequestedDate, $FPSenttoClien, $NTPDate, $ProjectFee, $ID, $DueDate, $Project, $SubProject, $Status,$Category)
     {
         $sql = "UPDATE [dbo].[Projects&Proposal] SET
-                        ([ProjectName]=:projectname, 
-                        [Project]= :project, 
-                        [ProjectDescription]= :projectdescription, 
-                        [ContractValue]= :contractvalue, 
-                        [SubProject]= :subproject, 
-                        [Task]= :task,
-                        [DeparmentManager]= :deparmentmanager,
-                        [AwardDate]= :awarddate,
-                        [Status]= :status,
-                        [Category]= :category,
-                        [ProjectType]= :projecttype,
-                        [Scope]=  :scope, 
-                        [Estimated_h]= :estimatedh,
-                        [PM]= :pm,
-                        [Discipline]= :discipline,
-                        [Market] = :market, 
-                        [ServiceEng] = :serviceeng,
-                        [IdProjectType] = :idprojecttype)
+                        ([ProjectName]=:ProjectName, 
+                        [Project]= :Project, 
+                        [ProjectDescription]= :ProjectName, 
+                        [ContractValue]= :ProjectFee, 
+                        [SubProject]= :SubProject, 
+                        [Task]= :Task,
+                        [DeparmentManager]= :DepartmentManager,
+                        [AwardDate]= :NTPDate,
+                        [Status]= :Status,
+                        [Category]= :Category,
+                        [DECONProjectType]= :ProjectType,
+                        [Scope]=  :ProjectScope, 
+                        [EstimatedDueDate]= :DueDate,
+                        [PM]= :ProjectManager,
+                        [Discipline]= :MainServiceLine,
+                        [Market] = :Market, 
+                        [ServiceEng] = :EngineeringService,
+                    
+                                  
 
-                WHERE [ID] = :id";
+                WHERE [ID] = :ID";
  
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
-            ':name' => $nom,
-            ':category' => $cat,
-            ':projectdescription' => $des,
-            ':contractvalue' => $con,
-            ':estimatedhours' => $est,
-            ':year' => $year,
-            ':proposal' => $pro,
-            ':noproposal' => $nopro,
-            ':country' => $country,
-            ':proposalrequestdate' => $proreq,
-            ':proposalsubmitted' => $prosub,
-            ':scope' => $scope,
-            ':statusprop' => $statpro,
+            ':Client' => $Client,
+            ':selectedClient' => $selectedClient,
+            ':selectedEmployee' => $selectedEmployee,
+            ':AgreementNo' => $AgreementNo,
+            ':ClientProject' => $ClientProject,
+            ':ClientProjectCost' => $ClientProjectCost,
+            ':selectedFP' => $selectedFP,
+            ':ProjectCSJ' => $ProjectCSJ,
+            ':State' => $State,
+            ':County' => $County,
+            ':City' => $City,
+            ':HighwayNo' => $HighwayNo,
+            ':Owner' => $Owner,
+            ':Segment' => $Segment,
+            ':Bridge' => $Bridge,
+            ':Contact' => $Contact,
+            ':yearFP' => $yearFP,
+            ':FP' => $FP,
+            ':ProjectName' => $ProjectName,
+            ':ProjectScope' => $ProjectScope,
+            ':DepartmentManager' => $DepartmentManager,
+            ':ProjectManager' => $ProjectManager,
+            ':ProjectType' => $DECONProjectType,
+            ':Market' => $Market,
+            ':Task' => $Task,
+            ':MainServiceLine' => $MainServiceLine,
+            ':EngineeringService' => $EngineeringService,          
+            ':FPRequestedDate' => $FPRequestedDate,  
+            ':FPSenttoClien' => $FPSenttoClien,  
+            ':NTPDate' => $NTPDate,  
+            ':ProjectFee' => $ProjectFee,  
+            ':ID' => $ID, 
+            ':Project' => $Project,   
+            ':SubProject' => $SubProject, 
+            ':Status' => $Status, 
+            ':Category' => $Category,  
+            ':DueDate' => $DueDate                                                                                                                                     
         ]);
  
         return $stmt->rowCount();
@@ -334,7 +409,7 @@ public function updateProposal($nom, $cat, $des, $con, $est, $year, $pro, $id, $
     
  
 // Función para agregar un proposal
-public function addProposal($nom, $cat, $des, $con, $est, $year, $pro, $nopro, $country, $proreq, $prosub, $scope, $statpro)
+    public function addProposal ($nom, $cat, $des, $con, $est, $year, $pro, $nopro, $country, $proreq, $prosub, $scope, $statpro)
 {
  
     $sql = "INSERT INTO [dbo].[Projects&Proposal]
