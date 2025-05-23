@@ -57,7 +57,7 @@ class TransactionRepository
     // Función para obtener Cliente  por el ID
     public function getTransactionById($transactionId)
     {
-        $stmt = $this->db->prepare("SELECT * FROM clients WHERE clientid = :transaction_id");
+        $stmt = $this->db->prepare("SELECT * FROM clients WHERE ID= :transaction_id");
         $stmt->execute([':transaction_id' => $transactionId]);
         return $stmt->fetch();
     }
@@ -240,31 +240,37 @@ class TransactionRepository
     }
  
     // Función para agregar un cliente en la tabla clients
-    //public function addProposal($nom, $cat, $des, $con, $est, $year, $country, $pro, $nopro, $proreq, $prosub, $statpro, $scope )
-   
-    //{
- 
-        //$sql = "INSERT INTO [Projects&Proposal]
-                //([ClientName], [Category], [ProjectDescription], [ContractValue], [Estimated_h], [Year],[Country],[Proposal],[NoProposal],[ProposalRequestDate],[ProposalSubmitted],[StatusProp],[Scope])
-                //VALUES (:nom, :cat, :des, :con, :est, :year,:country,:pro, :nopro, :proreq, :prosub, :statpro,:scope )";
- 
-        //$stmt = $this->db->prepare($sql);
-        //$stmt->execute([
-            //':nom' => $nom,
-            //':cat' => $cat,
-            //':des' => $des,
-            //':con' => $con,
-            //':est' => $est,
-            //':year' => $year,
-            //':country' => $country,
-           //':pro' => $pro,
-          //':nopro' => $nopro,
-          //':proreq' => $proreq,
-          //':prosub' => $prosub,
-          //':statpro' => $statpro,
-         //':scope ' => $scope ,
-        //]);
-    //}
+    public function addProposal($idcli, $nom, $cat, $des, $con, $est, $year, $country, $pro, $nopro, $proreq, $prosub, $statpro, $scope)
+    {
+        $sql = "INSERT INTO [Projects&Proposal]
+                ([IDClient], [ClientName], [Category], [ProjectDescription], [ContractValue], [Estimated_h], [Year], [Country],
+                [Proposal], [NoProposal], [ProposalRequestDate], [ProposalSubmitted], [StatusProp], [Scope])
+                VALUES (:idcli, :nom, :cat, :des, :con, :est, :year, :country, :pro, :nopro, :proreq, :prosub, :statpro, :scope)";
+
+        $stmt = $this->db->prepare($sql);
+
+        // Asignar los valores usando bindValue con tipo correcto
+        $stmt->bindValue(':nom', $nom);
+        $stmt->bindValue(':cat', $cat);
+        $stmt->bindValue(':des', $des);
+        $stmt->bindValue(':est', $est);
+        $stmt->bindValue(':year', $year);
+
+
+        $stmt->bindValue(':country', $country);
+        $stmt->bindValue(':idcli', $idcli === null ? null : $con,     $con     === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
+        $stmt->bindValue(':con',     $con     === null ? null : $con,     $con     === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
+        $stmt->bindValue(':pro',     $pro     === null ? null : $pro,     $pro     === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
+        $stmt->bindValue(':nopro',   $nopro   === null ? null : $nopro,   $nopro   === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
+        $stmt->bindValue(':proreq',  $proreq  === null ? null : $proreq,  $proreq  === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
+        $stmt->bindValue(':prosub',  $prosub  === null ? null : $prosub,  $prosub  === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
+        $stmt->bindValue(':statpro', $statpro === null ? null : $statpro, $statpro === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
+        $stmt->bindValue(':scope',   $scope   === null ? null : $scope,   $scope   === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
+
+        return $stmt->execute();
+    }
+
+
 ///////     ACTUALIZAR   ////////
  
  
@@ -293,6 +299,24 @@ class TransactionRepository
  
         return $stmt->rowCount();
     }
+
+    // Función para actualizar un Last Proposal and Project
+    public function updatelastProposal($proj, $prop, $id)
+    {
+        $sql = "UPDATE [dbo].[LastProjectProposal] SET [NoProposal] = :prop1,  [NoProject] = :proj1  WHERE [ID] = :id1";
+ 
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            ':id1' => $id,
+            ':prop1' => $prop,
+            ':proj1' => $proj,
+             
+        ]);
+ 
+        return $stmt->rowCount();
+    }
+
+
 
     // Función para actualizar proposal
 
@@ -336,9 +360,10 @@ public function updateProposal($nom, $cat, $des, $con, $est, $year, $pro, $id, $
     }
     
     // Función para actualizar proposal to Project
-    public function updateProposaltoProject( $Client, $selectedClient,$selectedEmployee, $AgreementNo, $ClientProject, $ClientProjectCost, $selectedFP, $ProjectCSJ, $State, $County, $City, $HighwayNo, $Owner,$Segment, $Bridge, $Contact, $yearFP,  $FP, $ProjectName, $ProjectScope, $DepartmentManager,  $ProjectManager, $Task, $DECONProjectType, $Market, $MainServiceLine, $EngineeringService, $FPRequestedDate, $FPSenttoClien, $NTPDate, $ProjectFee, $ID, $DueDate, $Project, $SubProject, $Status,$Category)
+    public function updateProposaltoProject($ProjectName,  $Project, $ProjectDescription,  $ProjectFee, $SubProject, $Task, $DepartmentManager, $NTPDate,  $Status, $Category,  $ProjectType, $ProjectScope,$DueDate, $ProjectManager, $MainServiceLine, $Market, $EngineeringService, $ID)
     {
-        $sql = "UPDATE [dbo].[Projects&Proposal] SET
+
+       $sql = "UPDATE [dbo].[Projects&Proposal] SET
                         ([ProjectName]=:ProjectName, 
                         [Project]= :Project, 
                         [ProjectDescription]= :ProjectName, 
@@ -355,84 +380,65 @@ public function updateProposal($nom, $cat, $des, $con, $est, $year, $pro, $id, $
                         [PM]= :ProjectManager,
                         [Discipline]= :MainServiceLine,
                         [Market] = :Market, 
-                        [ServiceEng] = :EngineeringService,
-                    
-                                  
-
+                        [ServiceEng] = :EngineeringService
                 WHERE [ID] = :ID";
  
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
-            ':Client' => $Client,
-            ':selectedClient' => $selectedClient,
-            ':selectedEmployee' => $selectedEmployee,
-            ':AgreementNo' => $AgreementNo,
-            ':ClientProject' => $ClientProject,
-            ':ClientProjectCost' => $ClientProjectCost,
-            ':selectedFP' => $selectedFP,
-            ':ProjectCSJ' => $ProjectCSJ,
-            ':State' => $State,
-            ':County' => $County,
-            ':City' => $City,
-            ':HighwayNo' => $HighwayNo,
-            ':Owner' => $Owner,
-            ':Segment' => $Segment,
-            ':Bridge' => $Bridge,
-            ':Contact' => $Contact,
-            ':yearFP' => $yearFP,
-            ':FP' => $FP,
             ':ProjectName' => $ProjectName,
-            ':ProjectScope' => $ProjectScope,
-            ':DepartmentManager' => $DepartmentManager,
-            ':ProjectManager' => $ProjectManager,
-            ':ProjectType' => $DECONProjectType,
-            ':Market' => $Market,
-            ':Task' => $Task,
-            ':MainServiceLine' => $MainServiceLine,
-            ':EngineeringService' => $EngineeringService,          
-            ':FPRequestedDate' => $FPRequestedDate,  
-            ':FPSenttoClien' => $FPSenttoClien,  
-            ':NTPDate' => $NTPDate,  
+            ':Project' => $Project,
+            ':ProjectDescription' => $ProjectDescription,
             ':ProjectFee' => $ProjectFee,  
-            ':ID' => $ID, 
-            ':Project' => $Project,   
             ':SubProject' => $SubProject, 
+            ':Task' => $Task,
+            ':DepartmentManager' => $DepartmentManager,
+            ':NTPDate' => $NTPDate,  
             ':Status' => $Status, 
             ':Category' => $Category,  
-            ':DueDate' => $DueDate                                                                                                                                     
+            ':ProjectType' => $ProjectType,
+            ':ProjectScope' => $ProjectScope,
+            ':DueDate' => $DueDate,
+            ':ProjectManager' => $ProjectManager,
+            ':MainServiceLine' => $MainServiceLine,
+            ':Market' => $Market,
+            ':EngineeringService' => $EngineeringService,          
+            ':ID' => $ID                                                                                                                                   
         ]);
  
         return $stmt->rowCount();
     }
     
+    // Función para agregar un details en la tabla detailsprojects
+    public function addProjectdetails($ClientName, $Agreement, $ProjectCost, $ProjectCSJNo, $State, $County,$City, $HighwayNo, $Owner, $SegmentBridge, $BridgeDistrict, $ContactInf,$GralDesProject,$ProjectName, $ClientProject)
+   
+    {
+ 
+        $sql = "INSERT INTO ClientDetailProject
+                ([ClientName], [Agreement], [ProjectCost], [ProjectCSJContractNo], [State], [County],[City],[HighwayNo],[Owner],[SegmentBridge],[BridgeDistrict],
+                [ContactInformation],[GeneralDescriptionProject],[ProjectName],[ClientProject])
+                VALUES (:ClientName, :Agreement, :ProjectCost, :ProjectCSJContractNo, :State, :County,:City,:HighwayNo, :Owner, :SegmentBridge, :BridgeDistrict,
+                 :ContactInformation,:GeneralDescriptionProject, :ProjectName, :ClientProject)";
+ 
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            ':ClientName' => $ClientName,
+            ':Agreement' => $Agreement,
+            ':ProjectCost' => $ProjectCost,
+            ':ProjectCSJContractNo' => $ProjectCSJNo,
+            ':State' => $State,
+            ':County' => $County,
+           ':City' => $City,
+          ':HighwayNo' => $HighwayNo,
+          ':Owner' => $Owner,
+          ':SegmentBridge' => $SegmentBridge,
+          ':BridgeDistrict' => $BridgeDistrict,
+           ':ContactInformation' => $ContactInf,
+          ':GeneralDescriptionProject' => $GralDesProject,
+          ':ProjectName' => $ProjectName,
+          ':ClientProject' => $ClientProject,
+        ]);
+    }
 
-    
- 
-// Función para agregar un proposal
-    public function addProposal ($nom, $cat, $des, $con, $est, $year, $pro, $nopro, $country, $proreq, $prosub, $scope, $statpro)
-{
- 
-    $sql = "INSERT INTO [dbo].[Projects&Proposal]
-            ([Name], [Category], [ProjectDescription], [ContractValue], [EstimatedHours], [Year],[Proposal],[NoProposal],[Country],[ProposalRequestDate],[ProposalSubmitted],[Scope],[StatusProp])
-            VALUES (:name, :category, :projectdescription, :contractvalue, :estimatedhours, :year, :proposal,:noproposal, :country, :proposalrequestdate, :proposalsubmitted, :scope, :statusprop)";
- 
-    $stmt = $this->db->prepare($sql);
-    $stmt->execute([
-        ':name' => $nom,
-        ':category' => $cat,
-        ':projectdescription' => $des,
-        ':contractvalue' => $con,
-        ':estimatedhours' => $est,
-        ':year' => $year,
-        ':proposal' => $pro,
-       ':noproposal' => $nopro,
-      ':country' => $country,
-      ':proposalrequestdate' => $proreq,
-      ':proposalsubmitted' => $prosub,
-      ':scope' => $scope,
-      ':statusprop' => $statpro,
-    ]);
-}
  
 ///////     ELIMINAR   ////////
  

@@ -383,12 +383,12 @@ $app->post('/api/decon/AddClient', function ($request, $response) {
 $app->post('/api/decon/addProposal', function ($request, $response) {
     $input = $request->getParsedBody();
  
-    $nom = $input["ClientID"];
-    $nom = $input["Name"];
+    $idcli = $input["IDClient"];
+    $nom = $input["ClientName"];
     $cat = $input["Category"];
     $des = $input["ProjectDescription"];
     $con = $input["ContractValue"];
-    $est = $input["EstimatedHours"];
+    $est = $input["Estimated_h"];
     $year=$input["Year"];
     $pro=$input["Proposal"];
     $nopro=$input["NoProposal"];
@@ -399,7 +399,7 @@ $app->post('/api/decon/addProposal', function ($request, $response) {
     $statpro=$input["StatusProp"];
  
     $transactionRepository = new TransactionRepository($this->db);
-    $data = $transactionRepository->addProposal($nom, $cat, $des, $con, $est, $year, $country, $pro, $nopro, $proreq, $prosub, $statpro, $scope );
+    $data = $transactionRepository->addProposal($idcli, $nom, $cat, $des, $con, $est, $year, $country, $pro, $nopro, $proreq, $prosub, $statpro, $scope );
  
     if (!$data) {
         $errorResponse = [
@@ -448,7 +448,34 @@ $app->post('/api/decon/updateClient', function ($request, $response) {
     ], 200);
 });
  
+// PUT: Update a lastProposal
+$app->post('/api/decon/updatelastProposal', function ($request, $response) {
+ 
+ 
+    $input = $request->getParsedBody();
+    $prop = $input["NoProposal"];
+    $proj = $input["NoProject"];
+    $id= $input["ID"];
 
+ 
+    $transactionRepository = new TransactionRepository($this->db);
+    $data = $transactionRepository->updatelastProposal($proj, $prop, $id);
+ 
+    if ($data === 0) {
+        return $response->withJson([
+            'error' => true,
+            'stateCode' => 400,
+            'result' => "No records updated. ID may not exist or values were the same."
+        ], 400);
+    }
+ 
+ return $response->withJson([
+        'error' => false,
+        'stateCode' => 200,
+        'result' => "Client ID $id updated successfully"
+    ], 200);
+});
+ 
 // PUT: Update a Proposal
 $app->post('/api/decon/updateProposal', function ($request, $response) {
  
@@ -490,7 +517,8 @@ $app->post('/api/decon/updateProposal', function ($request, $response) {
 // PUT: Update Proposal to Project
 $app->post('/api/decon/updateProposaltoProject', function ($request, $response) {
  
- 
+
+
     $input = $request->getParsedBody();
     $Client= $input["Client"];
     $selectedClient= $input["selectedClient"] ?? null;
@@ -529,9 +557,11 @@ $app->post('/api/decon/updateProposaltoProject', function ($request, $response) 
     $Status= $input['Status'];
     $Category= $input['Category'];   
     $ID= $input['ID'];
-
+    $ProjectDescription= $input['ProjectDescription'];
+    $ProjectType= $input['ProjectType'];
+    
     $transactionRepository = new TransactionRepository($this->db);
-    $data = $transactionRepository->updateProposaltoProject( $Client, $selectedClient,$selectedEmployee, $AgreementNo, $ClientProject, $ClientProjectCost, $selectedFP, $ProjectCSJ, $State, $County, $City, $HighwayNo, $Owner,$Segment, $Bridge, $Contact, $yearFP,  $FP, $ProjectName, $ProjectScope, $DepartmentManager,  $ProjectManager, $Task, $DECONProjectType, $Market, $MainServiceLine, $EngineeringService, $FPRequestedDate, $FPSenttoClien, $NTPDate, $ProjectFee, $ID, $DueDate, $Project, $SubProject, $Status,$Category);
+    $data = $transactionRepository->updateProposaltoProject($ProjectName,  $Project, $ProjectDescription,  $ProjectFee, $SubProject, $Task, $DepartmentManager, $NTPDate,  $Status, $Category,  $ProjectType, $ProjectScope,$DueDate, $ProjectManager, $MainServiceLine, $Market, $EngineeringService, $ID);
  
     if ($data === 0) {
         return $response->withJson([
@@ -540,6 +570,16 @@ $app->post('/api/decon/updateProposaltoProject', function ($request, $response) 
             'result' => "No records updated. ID may not exist or values were the same."
         ], 400);
     }
+       $data1 = $transactionRepository->addProjectdetails($Client, $AgreementNo, $ClientProjectCost, $ProjectCSJ, $State, $County,$City, $HighwayNo, $Owner, $Segment, $Bridge, $Contact,$ProjectScope,$ProjectName, $ClientProject);
+
+    if ($data1 === 0) {
+        return $response->withJson([
+            'error' => true,
+            'stateCode' => 400,
+            'result' => "No records updated. ID may not exist or values were the same."
+        ], 400);
+    }
+      
  
  return $response->withJson([
         'error' => false,
