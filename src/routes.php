@@ -1,5 +1,5 @@
 <?php
- 
+//use Slim\Http\UploadedFile;
 ini_set('display_errors', '0');
 error_reporting(0);
  
@@ -25,6 +25,27 @@ $app->get('/api/decon/getTransaction', function ($request, $response) {
  
     return $response->withJson($data, 200);
 });
+
+// GET: Get last SubProject
+$app->get('/api/decon/getLastSubproject', function ($request, $response) {
+    $idTransaction = $request->getQueryParam('Project');
+ 
+    $transactionRepository = new TransactionRepository($this->db);
+    $data = $transactionRepository->getLastSubproject($idTransaction);
+ 
+    if (!$data) {
+        $errorResponse = [
+            'error' => true,
+            'stateCode' => 400,
+            'result' => 'No se encontraron Registros'
+        ];
+        return $response->withJson($errorResponse, 400);
+    }
+ 
+    return $response->withJson($data, 200);
+});
+
+
  
 // GET: Get all Clients
 $app->get('/api/decon/getAll', function ($request, $response) {
@@ -142,6 +163,27 @@ $app->get('/api/decon/getAllProjects', function ($request, $response) {
  
     return $response->withJson($data, 200);
 });
+
+// GET: Get Projects by status
+$app->get('/api/decon/getAllProjectsStatus', function ($request, $response) {
+    $idTransaction = $request->getQueryParam('Status');
+    $transactionRepository = new TransactionRepository($this->db);
+  $data = $transactionRepository->getAllProjectsStatus($idTransaction);
+    if (!$data) {
+        $errorResponse = [
+            'error' => true,
+            'stateCode' => 400,
+            'result' => 'No se encontraron Registros'
+        ];
+        return $response->withJson($errorResponse, 400);
+    }
+ 
+    return $response->withJson($data, 200);
+});
+
+
+
+
  
 // GET: Get transaction by Project Name
 $app->get('/api/decon/getbyProjectName', function ($request, $response) {
@@ -187,6 +229,23 @@ $app->get('/api/decon/getByProposalNum', function ($request, $response) {
 $app->get('/api/decon/getbyYear', function ($request, $response) {
     $transactionRepository = new TransactionRepository($this->db);
     $data = $transactionRepository->getbyYear();
+ 
+    if (!$data) {
+        $errorResponse = [
+            'error' => true,
+            'stateCode' => 400,
+            'result' => 'No se encontraron Registros'
+        ];
+        return $response->withJson($errorResponse, 400);
+    }
+ 
+    return $response->withJson($data, 200);
+});
+
+// GET: Get by distinct Project
+$app->get('/api/decon/getProjectA', function ($request, $response) {
+    $transactionRepository = new TransactionRepository($this->db);
+    $data = $transactionRepository->getProjectA();
  
     if (!$data) {
         $errorResponse = [
@@ -345,10 +404,36 @@ $app->get('/api/decon/getAllProjectDetails', function ($request, $response) {
     return $response->withJson($data, 200);
 });
 
+
+// GET: Get all Contacts
+$app->get('/api/decon/getAllContacts', function ($request, $response) {
+    $transactionRepository = new TransactionRepository($this->db);
+    $data = $transactionRepository->getAllContacts();
+ 
+    if (!$data) {
+        $errorResponse = [
+            'error' => true,
+            'stateCode' => 400,
+            'result' => 'No se encontraron Registros'
+        ];
+        return $response->withJson($errorResponse, 400);
+    }
+ 
+    return $response->withJson($data, 200);
+});
+
 ///////     ADICIONAR   ////////
  
 // POST: Add a client
 $app->post('/api/decon/AddClient', function ($request, $response) {
+       // require_once 'class-phpass.php';
+        //$current_date = date("YmdHis");
+       // $directory='./images/';
+       // $uploadedFile = $request->getUploadedFiles();
+        //$filename = moveUploadedFile($directory, $uploadedFile['file'],"logo".$current_date);
+     
+     //  $tmp = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]/images/".$filename;
+
     $input = $request->getParsedBody();
  
     $nom = $input["Name"];
@@ -363,7 +448,8 @@ $app->post('/api/decon/AddClient', function ($request, $response) {
     $logo=$input["Logo"];
     $per=$input["Period_of_Invoice"];
     $proc=$input["Procedure"];
- 
+
+
     $transactionRepository = new TransactionRepository($this->db);
     $data = $transactionRepository->addClient($nom, $addr, $cit, $state, $zip, $act, $country, $doc, $inv, $logo, $per, $proc);
  
@@ -514,63 +600,53 @@ $app->post('/api/decon/updateProposal', function ($request, $response) {
     ], 200);
 });
 
-// PUT: Update Proposal to Project
-$app->post('/api/decon/updateProposaltoProject', function ($request, $response) {
+// PUT: Update a detail Projects
+$app->post('/api/decon/updateProjectdetails', function ($request, $response) {
+
  
 
 
     $input = $request->getParsedBody();
-    $Client= $input["Client"];
-    $selectedClient= $input["selectedClient"] ?? null;
-    $selectedEmployee= $input["selectedEmployee"] ?? null;
-    $AgreementNo= $input["AgreementNo"] ?? null;
-    $ClientProject= $input["ClientProject"] ?? null;
-    $ClientProjectCost= $input["ClientProjectCost"] ?? null;
-    $selectedFP= $input['selectedFP'];
+    $ProjectName= $input['ProjectName'];
+    $Project= $input['Project'];
+    $ProjectFee= $input['ProjectFee'];
+    $ProjectDescription= $input['ProjectDescription'];
+    $SubProject= $input['SubProject'];
+    $Task= $input['Task'];
+    $DepartmentManager= $input['DepartmentManager'];
+    $NTPDate= $input['NTPDate'];
+    $Status= $input['Status'];
+    $Category= $input['Category'];  
+    $ProjectType= $input['ProjectType'];
+    $ProjectScope= $input['ProjectScope'];
+    $DueDate= $input['DueDate'];
+    $ProjectManager= $input['ProjectManager'];
+    $MainServiceLine= $input['MainServiceLine'];
+    $Market= $input['Market'];
+    $EngineeringService= $input['EngineeringService'];
+    $ID= $input['ID'];
+    $IDD= $input['IDD'];
+    $ClientName= $input["selectedClient"] ?? null;
+    $Agreement= $input["AgreementNo"] ?? null;
+    $ProjectCSJNo = $input["ClientProjectCost"] ?? null;
     $ProjectCSJ= $input['ProjectCSJ'];
     $State= $input['State'];
     $County= $input['County'];
     $City= $input['City'];
     $HighwayNo= $input['HighwayNo'];
     $Owner= $input['Owner'];
-    $Segment= $input['Segment'];
-    $Bridge= $input['Bridge'];
-    $yearFP= $input['yearFP'];
-    $Contact= $input['Contact'];
-    $FP= $input['FP'];
-    $ProjectName= $input['ProjectName'];
-    $ProjectScope= $input['ProjectScope'];
-    $DepartmentManager= $input['DepartmentManager'];
-    $ProjectManager= $input['ProjectManager'];
-    $DECONProjectType= $input['DECONProjectType'];
-    $Task= $input['Task'];
-    $Market= $input['Market'];
-    $MainServiceLine= $input['MainServiceLine'];
-    $EngineeringService= $input['EngineeringService'];
-    $FPRequestedDate= $input['FPRequestedDate'];
-    $FPSenttoClien= $input['FPSenttoClien'];
-    $NTPDate= $input['NTPDate'];
-    $ProjectFee= $input['ProjectFee'];
-    $DueDate= $input['DueDate'];
-    $Project= $input['Project'];
-    $SubProject= $input['SubProject'];
-    $Status= $input['Status'];
-    $Category= $input['Category'];   
-    $ID= $input['ID'];
-    $ProjectDescription= $input['ProjectDescription'];
-    $ProjectType= $input['ProjectType'];
-    
+    $SegmentBridge = $input['Segment'];
+    $BridgeDistrict = $input['Bridge'];
+    $ContactInf = $input['Contact'];
+    $GralDesProject=$input['GeneralDescription'];
+    $ClientProject= $input["ClientProject"] ?? null;
+    $ProjectCost= $input["ProjectCost"];
+
+
     $transactionRepository = new TransactionRepository($this->db);
-    $data = $transactionRepository->updateProposaltoProject($ProjectName,  $Project, $ProjectDescription,  $ProjectFee, $SubProject, $Task, $DepartmentManager, $NTPDate,  $Status, $Category,  $ProjectType, $ProjectScope,$DueDate, $ProjectManager, $MainServiceLine, $Market, $EngineeringService, $ID);
- 
-    if ($data === 0) {
-        return $response->withJson([
-            'error' => true,
-            'stateCode' => 400,
-            'result' => "No records updated. ID may not exist or values were the same."
-        ], 400);
-    }
-       $data1 = $transactionRepository->addProjectdetails($Client, $AgreementNo, $ClientProjectCost, $ProjectCSJ, $State, $County,$City, $HighwayNo, $Owner, $Segment, $Bridge, $Contact,$ProjectScope,$ProjectName, $ClientProject);
+
+      $data1 = $transactionRepository->updateProjectdetails($ClientName,  $Agreement, $ProjectCost,  $ProjectCSJNo, $State, $County, $City, $HighwayNo,  $Owner, $SegmentBridge,  $BridgeDistrict, $ContactInf, $GralDesProject,
+$ProjectName, $ClientProject, $ID);
 
     if ($data1 === 0) {
         return $response->withJson([
@@ -589,6 +665,187 @@ $app->post('/api/decon/updateProposaltoProject', function ($request, $response) 
 });
 
  
+
+// PUT: Update Project
+
+
+$app->post('/api/decon/updateProject', function ($request, $response) {
+ 
+
+
+    $input = $request->getParsedBody();
+    $FP= $input['FP'];
+    $ProjectFee= $input['ProjectFee'];
+    $ProjectDescription= $input['ProjectDescription'];
+    $Task= $input['Task'];
+    $DepartmentManager= $input['DepartmentManager'];
+    $NTPDate= $input['NTPDate'];
+    $Status= $input['Status'];
+    $ProjectType= $input['ProjectType'];
+    $ProjectScope= $input['ProjectScope'];
+    $DueDate= $input['DueDate'];
+    $ProjectManager= $input['ProjectManager'];
+    $MainServiceLine= $input['MainServiceLine'];
+    $Market= $input['Market'];
+    $EngineeringService= $input['EngineeringService'];
+    $ID= $input['ID'];
+    $ClientName= $input["selectedClient"] ?? null;
+    $Agreement= $input["AgreementNo"] ?? null;
+    $ProjectCSJNo = $input["ClientProjectCost"] ?? null;
+    $ProjectCSJ= $input['ProjectCSJ'];
+    $State= $input['State'];
+    $County= $input['County'];
+    $City= $input['City'];
+    $HighwayNo= $input['HighwayNo'];
+    $Owner= $input['Owner'];
+    $SegmentBridge = $input['Segment'];
+    $BridgeDistrict = $input['Bridge'];
+    $ContactInf = $input['Contact'];
+    $GralDesProject=$input['GeneralDescription'];
+    $ClientProject= $input["ClientProject"] ?? null;
+
+
+    $transactionRepository = new TransactionRepository($this->db);
+    $data = $transactionRepository->updateProject($FP, $ProjectDescription,  $ProjectFee, $Task, $DepartmentManager, $NTPDate,  $Status,  $ProjectType, $ProjectScope,$DueDate, $ProjectManager, $MainServiceLine, $Market, $EngineeringService, $ID);
+ 
+    if ($data === 0) {
+        return $response->withJson([
+            'error' => true,
+            'stateCode' => 400,
+            'result' => "No records updated. ID may not exist or values were the same."
+        ], 400);
+    }
+      
+ 
+ return $response->withJson([
+        'error' => false,
+        'stateCode' => 200,
+        'result' => "Client ID $ID updated successfully"
+    ], 200);
+});
+
+
+
+// PUT: Update Proposal to Project
+
+
+$app->post('/api/decon/updateProposaltoProject', function ($request, $response) {
+ 
+
+
+    $input = $request->getParsedBody();
+    $ProjectName= $input['ProjectName'];
+    $Project= $input['Project'];
+    $ProjectFee= $input['ProjectFee'];
+    $ProjectDescription= $input['ProjectDescription'];
+    $SubProject= $input['SubProject'];
+    $Task= $input['Task'];
+    $DepartmentManager= $input['DepartmentManager'];
+    $NTPDate= $input['NTPDate'];
+    $Status= $input['Status'];
+    $Category= $input['Category'];  
+    $ProjectType= $input['ProjectType'];
+    $ProjectScope= $input['ProjectScope'];
+    $DueDate= $input['DueDate'];
+    $ProjectManager= $input['ProjectManager'];
+    $MainServiceLine= $input['MainServiceLine'];
+    $Market= $input['Market'];
+    $EngineeringService= $input['EngineeringService'];
+    $ID= $input['ID'];
+    $ClientName= $input["selectedClient"] ?? null;
+    $Agreement= $input["AgreementNo"] ?? null;
+    $ProjectCSJNo = $input["ClientProjectCost"] ?? null;
+    $ProjectCSJ= $input['ProjectCSJ'];
+    $State= $input['State'];
+    $County= $input['County'];
+    $City= $input['City'];
+    $HighwayNo= $input['HighwayNo'];
+    $Owner= $input['Owner'];
+    $SegmentBridge = $input['Segment'];
+    $BridgeDistrict = $input['Bridge'];
+    $ContactInf = $input['Contact'];
+    $GralDesProject=$input['GeneralDescription'];
+    $ClientProject= $input["ClientProject"] ?? null;
+
+
+    $transactionRepository = new TransactionRepository($this->db);
+    $data = $transactionRepository->updateProposaltoProject($ProjectName,  $Project, $ProjectDescription,  $ProjectFee, $SubProject, $Task, $DepartmentManager, $NTPDate,  $Status, $Category,  $ProjectType, $ProjectScope,$DueDate, $ProjectManager, $MainServiceLine, $Market, $EngineeringService, $ID);
+ 
+    if ($data === 0) {
+        return $response->withJson([
+            'error' => true,
+            'stateCode' => 400,
+            'result' => "No records updated. ID may not exist or values were the same."
+        ], 400);
+    }
+      
+ 
+ return $response->withJson([
+        'error' => false,
+        'stateCode' => 200,
+        'result' => "Client ID $ID updated successfully"
+    ], 200);
+});
+
+$app->post('/api/decon/addProjectdetails', function ($request, $response) {
+ 
+
+    $input = $request->getParsedBody();
+    $ProjectName= $input['ProjectName'];
+    $Project= $input['Project'];
+    $ProjectFee= $input['ProjectFee'];
+    $ProjectDescription= $input['ProjectScope'];
+    $SubProject= $input['SubProject'];
+    $Task= $input['Task'];
+    $DepartmentManager= $input['DepartmentManager'];
+    $NTPDate= $input['NTPDate'];
+    $Status= $input['Status'];
+    $Category= $input['Category'];  
+    $ProjectType= $input['ProjectType'];
+    $ProjectScope= $input['ProjectScope'];
+    $DueDate= $input['DueDate'];
+    $ProjectManager= $input['ProjectManager'];
+    $MainServiceLine= $input['MainServiceLine'];
+    $Market= $input['Market'];
+    $EngineeringService= $input['EngineeringService'];
+    $ID= $input['ID'];
+    $ClientName= $input["selectedClient"] ?? null;
+    $Agreement= $input["AgreementNo"] ?? null;
+    $ProjectCSJNo = $input["ClientProjectCost"] ?? null;
+    $ProjectCSJ= $input['ProjectCSJ'];
+    $State= $input['State'];
+    $County= $input['County'];
+    $City= $input['City'];
+    $HighwayNo= $input['HighwayNo'];
+    $Owner= $input['Owner'];
+    $SegmentBridge = $input['Segment'];
+    $BridgeDistrict = $input['Bridge'];
+    $ContactInf = $input['Contact'];
+    $GralDesProject=$input['GeneralDescription'];
+    $ClientProject= $input["ClientProject"] ?? null;
+    $ProjectCost= $input["ProjectCost"];
+
+
+    $transactionRepository = new TransactionRepository($this->db);
+
+       $data1 = $transactionRepository->addProjectdetails($ClientName, $Agreement, $ProjectCost, $ProjectCSJNo, $State, $County,$City, $HighwayNo, $Owner, $SegmentBridge, $BridgeDistrict, $ContactInf,$GralDesProject,$ProjectName, $ClientProject);
+
+    if ($data1 === 0) {
+        return $response->withJson([
+            'error' => true,
+            'stateCode' => 400,
+            'result' => "No records updated. ID may not exist or values were the same."
+        ], 400);
+    }
+      
+ 
+ return $response->withJson([
+        'error' => false,
+        'stateCode' => 200,
+        'result' => "Client ID $ID updated successfully"
+    ], 200);
+});
+
 ///////     BORRAR   ////////
  
  
