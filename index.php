@@ -20,25 +20,25 @@ session_start();
 // Instantiate the app
 $settings = require __DIR__ . '/src/settings.php';
 $app = new \Slim\App($settings);
-$app->add(new \CorsSlim\CorsSlim());
+$app->add(function ($request, $response, $next) {
+    $response = $next($request, $response);
+    return $response
+        ->withHeader('Access-Control-Allow-Origin', '*')
+        ->withHeader('Access-Control-Allow-Headers', 'Content-Type, Accept, Origin, Authorization, X-Requested-With')
+        ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+        ->withHeader('Access-Control-Allow-Credentials', 'true');
+});
+
+$app->options('/{routes:.+}', function ($request, $response, $args) {
+    return $response;
+});
+
 // Set up dependencies
 require __DIR__ . '/src/dependencies.php';
 // Register middleware
 //require __DIR__ . '/src/LOGmiddleware.php';
 // Register routes
 require __DIR__ . '/src/routes.php';
-
-// $app->add(new Tuupola\Middleware\JwtAuthentication([
-//     "secret" => "b54606acb8682088b34c295030ce8101508c0def316ac6fa59ab757d653f903173ce47798e9ae2407343013373309584",
-//     "secure" => false,
-//     "error" => function ($response, $arguments) {
-//         $data["status"] = "error";
-//         $data["message"] = $arguments["message"];
-//         return $response
-//             ->withHeader("Content-Type", "application/json")
-//             ->getBody()->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
-//     }
-// ]));
 
 // Run app
 $app->run();
